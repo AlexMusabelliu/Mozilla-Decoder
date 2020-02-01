@@ -1,5 +1,7 @@
 Short python module to get the open tabs in Mozilla Firefox.
 
+Dependent on the lz4 module.
+
 Contains a method to decompress generic lz4-encrypted files and a method to get the tabs from a window of Mozilla Firefox.
 
 Also contains a main method with an example application: takes the tabs open in Mozilla Firefox and writes to a file the name of the video in the first tab open to YouTube.
