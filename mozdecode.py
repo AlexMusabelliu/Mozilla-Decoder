@@ -1,5 +1,6 @@
 import lz4.frame as lz4, json, time
 import lz4.block
+import win32gui
 
 def decompress(filepath, mozilla=False):
     '''
@@ -47,16 +48,28 @@ def get_tabs(filepath, verbal=False):
             alltabs.append(tab)
     return alltabs
 
+def _get_name(hwnd, trash):
+    global VLC_WINDOW, found2
+    s = win32gui.GetWindowText(hwnd)
+    if "- VLC" in s:
+        VLC_WINDOW = s
+        found2 = True
+
 if __name__ == "__main__":
     '''
     Example script below, which outputs to a file (CURSONG.txt) the name of the video playing on the first tab accessing YouTube.
     '''
     curSong = None
+    VLC_WINDOW = None
 
     while True:
         allTabs = get_tabs(r"C:\Users\AlexPC\AppData\Roaming\Mozilla\Firefox\Profiles\b1r8tuon.default\sessionstore-backups\recovery.jsonlz4")
+        found = False
+        found2 = False
+        
         for (name, url) in allTabs:
             if "YouTube" in name:
+                found = True
                 nexSong = name[:name.index(" - YouTube")]
                 
                 if nexSong != curSong:
@@ -65,6 +78,20 @@ if __name__ == "__main__":
                         f.write(curSong)
                         print(f"Wrote to file: \"{curSong}\"")
                     break
+        
+        if not found:
+            win32gui.EnumChildWindows(0, _get_name, None)
+            if VLC_WINDOW != curSong and found2:
+                # print(VLC_WINDOW, curSong)
+                with open("CURSONG.txt", 'w') as g:
+                    name = VLC_WINDOW[:VLC_WINDOW.index(" - VLC media player")]
+                    g.write(name)
+                    print(f"Wrote to file: \"{name}\"")
+                    curSong = VLC_WINDOW
+
+        if not found and not found2:
+            with open("CURSONG.txt", 'w') as f:
+                f.write("Nothing")
                         
 
         time.sleep(0.5)
